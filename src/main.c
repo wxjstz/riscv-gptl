@@ -16,6 +16,7 @@
 	"\\____|_|     _|  _____|\n"\
 	"\n"
 
+
 static void
 gptl_park(void **opensbi, void **kernel, void **initrd, void **end_addr)
 {
@@ -123,7 +124,17 @@ void main(int hartid, void *fdt)
 #endif
 
     asm volatile ("fence rw, rw");
+    uintptr_t status = csr_read(mstatus);
+    status = INSERT_FIELD(status, MSTATUS_MPIE, 0);
+    status = INSERT_FIELD(status, MSTATUS_MPP, PRV_M);
+    csr_write(mstatus, status);
     csr_write(mie, 0);
     csr_write(mtvec, opensbi_func);
-    opensbi_func(hartid, new_fdt);
+    csr_write(mepc, opensbi_func);
+    asm volatile ("mv	a0, %0\n\t"
+                  "mv	a1, %1\n\t"
+				  "mret"
+				  :
+				  :"r" (hartid), "r"(new_fdt)
+                  :"a0", "a1");
 }

@@ -4,6 +4,18 @@
 #define RISCV_PGSHIFT	12
 #define RISCV_PGSIZE	(1 << RISCV_PGSHIFT)
 
+#define MSTATUS_UPIE	0x00000010
+#define MSTATUS_SPIE	0x00000020
+#define MSTATUS_HPIE	0x00000040
+#define MSTATUS_MPIE	0x00000080
+#define MSTATUS_MPP	0x00001800
+#define MSTATUS_HPP	0x00000600
+#define MSTATUS_SPP	0x00000100
+#define PRV_U	0
+#define PRV_S	1
+#define PRV_H	2
+#define PRV_M	3
+
 #ifdef __ASSEMBLY__
 
 #if __riscv_xlen == 32
@@ -19,6 +31,11 @@
 #endif
 
 #else				/* __ASSEMBLY__ */
+
+#define EXTRACT_FIELD(val, which)\
+	(((val) & (which)) / ((which) & ~((which) - 1)))
+#define INSERT_FIELD(val, which, fieldval)\
+	(((val) & ~(which)) | ((fieldval) * ((which) & ~((which) - 1))))
 
 #define wfi()	asm volatile("wfi");
 #define mret()	asm volatile("mret");
