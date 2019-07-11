@@ -28,7 +28,7 @@ struct sifive_uart_registers {
     uint32_t div;               /* Baud rate divisor */
 } __attribute__ ((packed));
 
-void fu540_uart_init(unsigned int idx, unsigned int baudrate)
+void uart_init(unsigned int idx, unsigned int baudrate)
 {
     struct sifive_uart_registers *uart =
         (struct sifive_uart_registers *) (uintptr_t) FU540_UART(idx);
@@ -40,7 +40,7 @@ void fu540_uart_init(unsigned int idx, unsigned int baudrate)
     write32(&uart->rxctrl, RXCTRL_RXEN | RXCTRL_RXCNT(0));
 }
 
-void fu540_uart_tx_byte(int idx, uint8_t c)
+void uart_tx_byte(int idx, uint8_t c)
 {
     struct sifive_uart_registers *uart =
         (struct sifive_uart_registers *) (uintptr_t) FU540_UART(idx);
@@ -48,7 +48,7 @@ void fu540_uart_tx_byte(int idx, uint8_t c)
     write32(&uart->txdata, c & 0xff);
 }
 
-uint8_t fu540_uart_rx_byte(int idx)
+uint8_t uart_rx_byte(int idx)
 {
     uint32_t rxdata;
     struct sifive_uart_registers *uart =

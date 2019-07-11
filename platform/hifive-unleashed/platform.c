@@ -16,7 +16,7 @@
 
 static struct spi_ctrl *spi_ctrl = (struct spi_ctrl *) FU540_QSPI2;
 
-static void *platform_read_(size_t offset, size_t size, void *buff)
+static void *fu540_read(size_t offset, size_t size, void *buff)
 {
     uint8_t tmp[bs];
     if (offset / bs == (offset + size - 1) / bs) {
@@ -58,11 +58,11 @@ static void *platform_read_(size_t offset, size_t size, void *buff)
     return buff;
 }
 
-static void platform_init_()
+static void fu540_init()
 {
     if (csr_read(mhartid) == 0) {
         /* init uart for console */
-        fu540_uart_init(0, 115200);
+        uart_init(0, 115200);
 
         /* init spi for sdcard */
         sd_init(spi_ctrl);
@@ -71,16 +71,16 @@ static void platform_init_()
     smp_wait(platform_hart_num());
 }
 
-static void platform_putchar_(char c)
+static void fu540_putchar(char c)
 {
-    fu540_uart_tx_byte(0, c);
+    uart_tx_byte(0, c);
 }
 
 struct platform_interface platform = {
     .hart_num = 5,
     .platform_name = "HiFive-Unleashed",
-    .init = platform_init_,
-    .putchar = platform_putchar_,
+    .init = fu540_init,
+    .putchar = fu540_putchar,
     .logic_block_size = bs,
-    .read = platform_read_,
+    .read = fu540_read,
 };
