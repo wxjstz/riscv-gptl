@@ -83,6 +83,18 @@ modify_dt(void *fdt, void *park_addr, void *kernel,
     dt_flatten(dt, park_addr);
 }
 
+void dump_hex(void *addr, size_t size)
+{
+    char *htab = "0123456789abcdef";
+    uint8_t *p = addr;
+    for (size_t i = 0; i < size; i++, p++) {
+        printf("%c", htab[((*p) >> 4) & 0xf]);
+        printf("%c", htab[((*p) >> 0) & 0xf]);
+        if (i % 30 == 29)
+            printf("\n");
+    }
+}
+
 void main(int hartid, void *fdt)
 {
     static void *new_fdt;
@@ -121,9 +133,17 @@ void main(int hartid, void *fdt)
            hartid, new_fdt);
     spinlock_unlock(&lock);
     smp_wait(platform_hart_num());
+
+    if (hartid == 0) {
+        printf("\nopensbi at %p, dump 1k at follow:\n", opensbi_func);
+        dump_hex(opensbi_func, 1024);
+        printf("\n");
+    }
+    smp_wait(platform_hart_num());
 #endif
 
     asm volatile ("fence rw, rw");
+
     uintptr_t status = csr_read(mstatus);
     status = INSERT_FIELD(status, MSTATUS_MPIE, 0);
     status = INSERT_FIELD(status, MSTATUS_MPP, PRV_M);
